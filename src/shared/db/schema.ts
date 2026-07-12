@@ -1,6 +1,16 @@
 import { sql } from "drizzle-orm";
 import { pgTable, text, timestamp, pgEnum, jsonb } from "drizzle-orm/pg-core";
 
+export const authTokens = pgTable("auth_tokens", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  // sha256 hex digest of the plaintext login token — the plaintext itself
+  // is never stored, only written once to a local file at generation time.
+  tokenHash: text("token_hash").notNull(),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
+});
+
 export const tags = pgTable("tags", {
   id: text("id")
     .primaryKey()

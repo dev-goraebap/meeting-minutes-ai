@@ -13,6 +13,7 @@ const TABS = [
 /** Fixed bottom tab bar, mobile only (<640px). Hidden at sm and up — AppNav takes over. */
 export function MobileTabBar() {
   const pathname = usePathname();
+  if (pathname === "/login") return null;
 
   return (
     <nav

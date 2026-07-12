@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { LogOut } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 
 const LINKS = [
@@ -11,6 +12,15 @@ const LINKS = [
 
 export function AppNav() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  if (pathname === "/login") return null;
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
     <header className="sticky top-0 z-40 hidden border-b border-divider bg-page/90 backdrop-blur sm:block">
@@ -48,6 +58,14 @@ export function AppNav() {
               );
             })}
           </nav>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="ml-auto flex items-center gap-1.5 text-caption font-medium text-ink-muted transition-colors hover:text-ink"
+          >
+            <LogOut className="size-3.5" />
+            로그아웃
+          </button>
         </div>
       </div>
     </header>
