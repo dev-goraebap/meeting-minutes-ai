@@ -124,3 +124,13 @@ export async function getRecentCompletedMinutes(
 export async function deleteMeeting(id: string) {
   await db.delete(meetings).where(eq(meetings.id, id));
 }
+
+export async function updateMeetingFields(
+  id: string,
+  fields: Partial<{
+    structuredMinutes: string;
+    speakerMapping: Record<string, string>;
+  }>,
+) {
+  await db.update(meetings).set(fields).where(eq(meetings.id, id));
+}

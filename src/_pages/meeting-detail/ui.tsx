@@ -3,13 +3,24 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { StatusBadge } from "@/shared/ui/status-badge";
-import { TagColorDot } from "@/shared/ui/tag-color-dot";
+import { TagColorDot, tagCycleColorVar } from "@/shared/ui/tag-color-dot";
+import { Textarea } from "@/shared/ui/textarea";
+import { Markdown } from "@/shared/ui/markdown";
+import { TabsRoot, TabsList, Tab, TabPanel } from "@/shared/ui/tabs";
 import { formatDate } from "@/shared/lib/format-date";
+import { formatTimestamp } from "@/shared/lib/format-timestamp";
 import { usePolling } from "@/shared/lib/use-polling";
 import type { MeetingStatus } from "@/shared/db/schema";
+
+type TranscriptSegment = {
+  speaker: string;
+  start: number;
+  end: number;
+  text: string;
+};
 
 type Meeting = {
   id: string;
@@ -20,7 +31,7 @@ type Meeting = {
   audioFilePath: string;
   status: MeetingStatus;
   errorMessage: string | null;
-  rawTranscript: unknown[] | null;
+  rawTranscript: TranscriptSegment[] | null;
   structuredMinutes: string | null;
   speakerMapping: Record<string, string> | null;
   extraNote: string | null;
@@ -77,6 +88,11 @@ function StepIcon({ index, state }: { index: number; state: StepState }) {
   return (
     <div className={`${base} bg-surface-sunken text-ink-muted`}>{index + 1}</div>
   );
+}
+
+export function speakerCycleIndex(speakerLabel: string) {
+  const code = speakerLabel.toUpperCase().charCodeAt(0) - "A".charCodeAt(0);
+  return Number.isFinite(code) && code >= 0 ? code : 0;
 }
 
 export function MeetingDetailPage({ id }: { id: string }) {
@@ -206,14 +222,101 @@ export function MeetingDetailPage({ id }: { id: string }) {
             )}
           </div>
         ) : (
-          <div className="mt-6 rounded-[var(--radius-card)] border border-border bg-surface p-6">
-            <h2 className="text-section-label font-bold text-ink">구조화 회의록</h2>
-            <pre className="mt-3 whitespace-pre-wrap text-body text-ink">
-              {meeting.structuredMinutes}
-            </pre>
-          </div>
+          <CompletedMeetingView meeting={meeting} onUpdated={fetchMeeting} />
         )}
       </div>
     </main>
+  );
+}
+
+function CompletedMeetingView({
+  meeting,
+  onUpdated,
+}: {
+  meeting: Meeting;
+  onUpdated: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(meeting.structuredMinutes ?? "");
+  const [saving, setSaving] = useState(false);
+
+  function startEditing() {
+    setDraft(meeting.structuredMinutes ?? "");
+    setEditing(true);
+  }
+
+  async function save() {
+    setSaving(true);
+    await fetch(`/api/meetings/${meeting.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ structuredMinutes: draft }),
+    });
+    setSaving(false);
+    setEditing(false);
+    onUpdated();
+  }
+
+  return (
+    <div className="mt-6 rounded-[var(--radius-card)] border border-border bg-surface p-6">
+      <TabsRoot defaultValue="minutes">
+        <TabsList>
+          <Tab value="minutes">구조화 회의록</Tab>
+          <Tab value="transcript">전사 원문</Tab>
+        </TabsList>
+
+        <TabPanel value="minutes">
+          <div className="mb-3 flex justify-end">
+            {editing ? (
+              <div className="flex gap-2">
+                <Button variant="secondary" onClick={() => setEditing(false)} disabled={saving}>
+                  취소
+                </Button>
+                <Button onClick={save} disabled={saving}>
+                  {saving ? "저장 중…" : "저장"}
+                </Button>
+              </div>
+            ) : (
+              <Button variant="secondary" onClick={startEditing}>
+                <Pencil className="size-3.5" />
+                편집
+              </Button>
+            )}
+          </div>
+
+          {editing ? (
+            <Textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              rows={20}
+              className="font-mono text-body"
+            />
+          ) : (
+            <Markdown>{meeting.structuredMinutes ?? ""}</Markdown>
+          )}
+        </TabPanel>
+
+        <TabPanel value="transcript">
+          <div className="flex flex-col gap-3">
+            {(meeting.rawTranscript ?? []).map((segment, i) => (
+              <div key={i} className="flex gap-3">
+                <div className="flex w-16 shrink-0 flex-col items-start gap-1">
+                  <span
+                    className="rounded-[var(--radius-pill)] px-2 py-0.5 text-caption font-semibold text-white"
+                    style={{ backgroundColor: tagCycleColorVar(speakerCycleIndex(segment.speaker)) }}
+                  >
+                    {segment.speaker}
+                  </span>
+                  <span className="text-caption text-ink-faint">
+                    {formatTimestamp(segment.start)}
+                  </span>
+                </div>
+                <p className="flex-1 text-body text-ink">{segment.text}</p>
+              </div>
+            ))}
+          </div>
+        </TabPanel>
+      </TabsRoot>
+    </div>
   );
 }
