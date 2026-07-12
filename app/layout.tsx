@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AppNav } from "@/shared/ui/app-nav";
+import { MobileTabBar, MobileFab } from "@/shared/ui/mobile-chrome";
 
 export const metadata: Metadata = {
   title: "회의록",
@@ -18,8 +19,10 @@ export default function RootLayout({
     <html lang="ko" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
         <AppNav />
-        {children}
+        <div className="pb-16 sm:pb-0">{children}</div>
         {modal}
+        <MobileTabBar />
+        <MobileFab />
       </body>
     </html>
   );

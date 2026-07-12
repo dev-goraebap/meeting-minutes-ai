@@ -104,13 +104,21 @@ export function MeetingListPage() {
               녹음 파일을 올리면 자동으로 전사·화자분리·구조화 회의록까지 만들어드려요.
             </p>
           </div>
-          <Button href="/meetings/new" className="shrink-0">
-            ＋ 새 회의 업로드
-          </Button>
+          <div className="hidden shrink-0 sm:block">
+            <Button href="/meetings/new">＋ 새 회의 업로드</Button>
+          </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <Button
+            href="/search"
+            variant="secondary"
+            className="w-full justify-start text-ink-muted sm:order-2 sm:w-auto"
+          >
+            <Search className="size-4" />
+            제목·내용 검색…
+          </Button>
+          <div className="flex flex-nowrap items-center gap-2 overflow-x-auto sm:order-1 sm:flex-wrap">
             <TagFilterChip
               active={activeTagId === null}
               count={totalCount}
@@ -130,10 +138,6 @@ export function MeetingListPage() {
               </TagFilterChip>
             ))}
           </div>
-          <Button href="/search" variant="secondary" className="text-ink-muted">
-            <Search className="size-4" />
-            제목·내용 검색…
-          </Button>
         </div>
 
         <div className="mt-6">

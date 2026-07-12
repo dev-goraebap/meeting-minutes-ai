@@ -13,7 +13,7 @@ export function AppNav() {
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-divider bg-page/90 backdrop-blur">
+    <header className="sticky top-0 z-40 hidden border-b border-divider bg-page/90 backdrop-blur sm:block">
       <div className="mx-auto flex max-w-2xl items-center gap-6 px-6 py-3">
         <Link href="/" className="flex items-center gap-2">
           <span className="flex size-7 items-center justify-center rounded-[var(--radius-control)] bg-accent text-caption font-bold text-white">
