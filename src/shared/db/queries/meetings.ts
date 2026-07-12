@@ -120,3 +120,7 @@ export async function getRecentCompletedMinutes(
     .map((r) => r.structuredMinutes)
     .filter((m): m is string => Boolean(m));
 }
+
+export async function deleteMeeting(id: string) {
+  await db.delete(meetings).where(eq(meetings.id, id));
+}
