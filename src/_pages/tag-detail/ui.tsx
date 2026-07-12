@@ -43,7 +43,7 @@ export function TagDetailPage({ id }: { id: string }) {
   if (notFound) {
     return (
       <main className="min-h-screen bg-page px-6 py-8">
-        <div className="mx-auto max-w-2xl text-center">
+        <div className="mx-auto max-w-page text-center">
           <p className="text-body text-ink-secondary">태그를 찾을 수 없어요.</p>
           <Link href="/tags" className="mt-3 inline-block text-accent underline">
             프로젝트 태그로 돌아가기
@@ -56,14 +56,14 @@ export function TagDetailPage({ id }: { id: string }) {
   if (!tag) {
     return (
       <main className="min-h-screen bg-page px-6 py-8">
-        <div className="mx-auto max-w-2xl text-body text-ink-muted">불러오는 중…</div>
+        <div className="mx-auto max-w-page text-body text-ink-muted">불러오는 중…</div>
       </main>
     );
   }
 
   return (
     <main className="min-h-screen bg-page px-6 py-8">
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-page">
         <Link
           href="/tags"
           className="inline-flex items-center gap-1 text-caption text-ink-muted hover:text-ink"
@@ -219,7 +219,7 @@ function ContextSection({
 
   return (
     <div className="mt-6 rounded-[var(--radius-card)] border border-border bg-surface p-6">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-section-label font-bold text-ink">배경 컨텍스트</h2>
         <div className="flex gap-2">
           <Button variant="secondary" onClick={copyPrompt}>

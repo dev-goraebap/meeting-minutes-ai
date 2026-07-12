@@ -8,6 +8,19 @@ import { runPipeline } from "./run-pipeline";
 
 const AUDIO_DIR = "./data/audio";
 
+// Mobile "record and share" flows (voice memo apps sharing a .aac/.amr file,
+// etc.) often hand the browser a File with an empty or generic
+// (application/octet-stream) MIME type, so `file.type.startsWith("audio/")`
+// alone rejects real audio files. Fall back to the extension.
+const AUDIO_EXTENSIONS = [
+  ".mp3", ".m4a", ".wav", ".aac", ".ogg", ".oga", ".flac", ".amr", ".3gp", ".3gpp", ".webm",
+];
+
+function looksLikeAudio(file: File) {
+  if (file.type.startsWith("audio/")) return true;
+  return AUDIO_EXTENSIONS.includes(path.extname(file.name).toLowerCase());
+}
+
 function extensionFromFile(file: File) {
   const fromName = path.extname(file.name);
   if (fromName) return fromName;
@@ -29,7 +42,7 @@ export async function postMeeting(request: NextRequest) {
       { status: 400 },
     );
   }
-  if (!audio.type.startsWith("audio/")) {
+  if (!looksLikeAudio(audio)) {
     return NextResponse.json(
       { error: "오디오 파일만 업로드할 수 있어요." },
       { status: 400 },

@@ -19,7 +19,7 @@ export default function RootLayout({
     <html lang="ko" className="h-full antialiased">
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <AppNav />
-        <div className="pb-16 sm:pb-0">{children}</div>
+        <div className="pb-24 sm:pb-0">{children}</div>
         {modal}
         <MobileTabBar />
         <MobileFab />

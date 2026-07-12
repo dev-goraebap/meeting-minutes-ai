@@ -13,7 +13,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
 };
 
 const BASE_CLASSES =
-  "inline-flex h-10 items-center justify-center gap-1.5 rounded-[var(--radius-control)] px-4 text-body font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-[var(--radius-control)] px-4 text-body font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50";
 
 type CommonProps = { variant?: ButtonVariant; className?: string };
 

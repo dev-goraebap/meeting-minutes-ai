@@ -23,7 +23,7 @@ export function Tab({
     <BaseTabs.Tab
       className={cn(
         "relative -mb-px border-b-2 border-transparent px-1 py-2.5 text-body font-semibold text-ink-muted transition-colors",
-        "data-[selected]:border-accent data-[selected]:text-accent",
+        "data-[active]:border-accent data-[active]:text-accent",
         className,
       )}
       {...props}

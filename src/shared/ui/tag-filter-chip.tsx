@@ -15,7 +15,7 @@ export function TagFilterChip({
     <button
       aria-pressed={active}
       className={cn(
-        "inline-flex h-8 items-center gap-1.5 rounded-[var(--radius-pill)] px-3 text-caption font-semibold transition-colors",
+        "inline-flex h-8 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[var(--radius-pill)] px-3 text-caption font-semibold transition-colors",
         active
           ? "bg-ink text-white"
           : "bg-surface text-ink-secondary border border-border hover:bg-surface-sunken",

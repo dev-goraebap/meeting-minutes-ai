@@ -154,7 +154,7 @@ function MeetingDetailPageInner({ id }: { id: string }) {
   if (notFound) {
     return (
       <main className="min-h-screen bg-page px-6 py-8">
-        <div className="mx-auto max-w-2xl text-center">
+        <div className="mx-auto max-w-page text-center">
           <p className="text-body text-ink-secondary">회의를 찾을 수 없어요.</p>
           <Link href="/" className="mt-3 inline-block text-accent underline">
             회의록으로 돌아가기
@@ -167,7 +167,7 @@ function MeetingDetailPageInner({ id }: { id: string }) {
   if (!meeting) {
     return (
       <main className="min-h-screen bg-page px-6 py-8">
-        <div className="mx-auto max-w-2xl text-body text-ink-muted">불러오는 중…</div>
+        <div className="mx-auto max-w-page text-body text-ink-muted">불러오는 중…</div>
       </main>
     );
   }
@@ -176,7 +176,7 @@ function MeetingDetailPageInner({ id }: { id: string }) {
 
   return (
     <main className="min-h-screen bg-page px-6 py-8">
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-page">
         <Link
           href="/"
           className="inline-flex items-center gap-1 text-caption text-ink-muted hover:text-ink"
@@ -186,14 +186,14 @@ function MeetingDetailPageInner({ id }: { id: string }) {
         </Link>
 
         <div className="mt-2 flex items-start justify-between gap-4">
-          <div>
+          <div className="min-w-0 flex-1">
             <h1 className="text-detail-h1 font-bold text-ink">{meeting.title}</h1>
             <p className="mt-1 flex items-center gap-1.5 text-meta text-ink-muted">
               <TagColorDot color={meeting.tagColor} />
               {meeting.tagName} · {formatDate(meeting.createdAt)}
             </p>
           </div>
-          <div className="flex flex-col items-end gap-2">
+          <div className="flex shrink-0 flex-col items-end gap-2">
             <StatusBadge status={meeting.status} />
             <button
               type="button"

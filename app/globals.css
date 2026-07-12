@@ -137,6 +137,9 @@
   --text-minutes-h2--line-height: 1.3;
   --text-minutes-h3: 14px;
   --text-minutes-h3--line-height: 1.3;
+
+  /* Page container width, per the design handoff (`max-width:980px`). */
+  --container-page: 980px;
 }
 
 body {

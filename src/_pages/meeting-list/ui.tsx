@@ -112,7 +112,7 @@ export function MeetingListPage() {
 
   return (
     <main className="min-h-screen bg-page px-6 py-8">
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-page">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-page-h1 font-bold text-ink">회의록</h1>

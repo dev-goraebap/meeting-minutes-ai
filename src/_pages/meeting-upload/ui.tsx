@@ -142,7 +142,7 @@ export function MeetingUploadPage() {
         >
           <input
             type="file"
-            accept="audio/*"
+            accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.oga,.flac,.amr,.3gp,.3gpp,.webm"
             className="sr-only"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
           />

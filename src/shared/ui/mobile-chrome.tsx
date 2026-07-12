@@ -2,12 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, Upload } from "lucide-react";
+import { FileText, Plus, Tag, Upload } from "lucide-react";
 import { cn } from "@/shared/lib/cn";
 
 const TABS = [
-  { href: "/", label: "회의록" },
-  { href: "/tags", label: "프로젝트 태그" },
+  { href: "/", label: "회의록", icon: FileText },
+  { href: "/tags", label: "프로젝트 태그", icon: Tag },
 ] as const;
 
 /** Fixed bottom tab bar, mobile only (<640px). Hidden at sm and up — AppNav takes over. */
@@ -22,15 +22,17 @@ export function MobileTabBar() {
       {TABS.map((tab) => {
         const active =
           tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
+        const Icon = tab.icon;
         return (
           <Link
             key={tab.href}
             href={tab.href}
             className={cn(
-              "flex flex-1 flex-col items-center gap-0.5 py-2.5 text-caption font-medium transition-colors",
+              "flex flex-1 flex-col items-center justify-center gap-1 py-2 text-caption font-medium transition-colors",
               active ? "text-accent" : "text-ink-muted",
             )}
           >
+            <Icon className="size-5" />
             {tab.label}
           </Link>
         );
@@ -57,7 +59,7 @@ export function MobileFab() {
       href={config.href}
       aria-label={config.label}
       className="fixed right-5 z-40 flex size-14 items-center justify-center rounded-full bg-accent text-white shadow-[var(--shadow-token-fab)] transition-colors hover:bg-accent-hover sm:hidden"
-      style={{ bottom: "calc(env(safe-area-inset-bottom) + 76px)" }}
+      style={{ bottom: "calc(env(safe-area-inset-bottom) + 80px)" }}
     >
       <Icon className="size-6" />
     </Link>

@@ -27,7 +27,7 @@ export function TagListPage() {
 
   return (
     <main className="min-h-screen bg-page px-6 py-8">
-      <div className="mx-auto max-w-2xl">
+      <div className="mx-auto max-w-page">
         <h1 className="text-page-h1 font-bold text-ink">프로젝트 태그</h1>
         <p className="mt-1 text-body text-ink-secondary">
           태그마다 배경 컨텍스트를 저장해 두면, 그 태그의 회의록을 만들 때 도메인 용어·참석자 역할 추정에 활용돼요.
