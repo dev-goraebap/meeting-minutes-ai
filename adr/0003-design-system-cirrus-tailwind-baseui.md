@@ -1,8 +1,12 @@
 # 3. UI 디자인 시스템: Cirrus 토큰 + Tailwind v4 + Base UI
 
-- Status: accepted
+- Status: superseded by [0004](0004-design-system-handoff.md)
 - Date: 2026-07-12
 - Deciders: dev-goraebap
+
+> **2026-07-12 후속 결정**: 사용자가 별도 세션에서 고충실도 디자인 핸드오프(`tmp/회의록 자동화 데모/`)를
+> 직접 제작해 가져오면서 Cirrus 토큰을 대체했다. Base UI(컴포넌트 동작 조달)와 Tailwind v4 결정은
+> 유지되고, 토큰 소스만 교체되었다. 자세한 내용은 [0004](0004-design-system-handoff.md) 참고.
 
 ## Context
 
