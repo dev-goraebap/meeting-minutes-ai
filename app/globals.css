@@ -144,3 +144,19 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
 }
+
+/* PDF export: print only the #mm-print minutes content (Task 14). */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #mm-print,
+  #mm-print * {
+    visibility: visible;
+  }
+  #mm-print {
+    position: absolute;
+    inset: 0;
+    padding: 24px;
+  }
+}

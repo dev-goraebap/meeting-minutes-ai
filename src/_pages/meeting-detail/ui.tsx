@@ -3,16 +3,18 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Check, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, Download, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { StatusBadge } from "@/shared/ui/status-badge";
 import { TagColorDot, tagCycleColorVar } from "@/shared/ui/tag-color-dot";
 import { Textarea } from "@/shared/ui/textarea";
 import { Markdown } from "@/shared/ui/markdown";
 import { TabsRoot, TabsList, Tab, TabPanel } from "@/shared/ui/tabs";
+import { MenuRoot, MenuTrigger, MenuContent, MenuItem } from "@/shared/ui/menu";
 import { formatDate } from "@/shared/lib/format-date";
 import { formatTimestamp } from "@/shared/lib/format-timestamp";
 import { usePolling } from "@/shared/lib/use-polling";
+import { downloadTextFile } from "@/shared/lib/download-file";
 import {
   applySpeakerMappingToText,
   distinctSpeakerLabels,
@@ -279,7 +281,7 @@ function CompletedMeetingView({
           </TabsList>
 
           <TabPanel value="minutes">
-            <div className="mb-3 flex justify-end">
+            <div className="mb-3 flex justify-end gap-2">
               {editing ? (
                 <div className="flex gap-2">
                   <Button variant="secondary" onClick={() => setEditing(false)} disabled={saving}>
@@ -290,10 +292,13 @@ function CompletedMeetingView({
                   </Button>
                 </div>
               ) : (
-                <Button variant="secondary" onClick={startEditing}>
-                  <Pencil className="size-3.5" />
-                  편집
-                </Button>
+                <>
+                  <DownloadMenu meeting={meeting} displayedMinutes={displayedMinutes} />
+                  <Button variant="secondary" onClick={startEditing}>
+                    <Pencil className="size-3.5" />
+                    편집
+                  </Button>
+                </>
               )}
             </div>
 
@@ -419,5 +424,45 @@ function SpeakerMappingBar({
         </>
       )}
     </div>
+  );
+}
+
+function DownloadMenu({
+  meeting,
+  displayedMinutes,
+}: {
+  meeting: Meeting;
+  displayedMinutes: string;
+}) {
+  const baseName = meeting.title.replace(/[\\/:*?"<>|]/g, "_");
+
+  return (
+    <MenuRoot>
+      <MenuTrigger
+        render={
+          <Button variant="secondary">
+            <Download className="size-3.5" />
+            다운로드
+          </Button>
+        }
+      />
+      <MenuContent>
+        <MenuItem onClick={() => window.print()}>PDF</MenuItem>
+        <MenuItem
+          onClick={() =>
+            downloadTextFile(`${baseName}.md`, displayedMinutes, "text/markdown")
+          }
+        >
+          Markdown (.md)
+        </MenuItem>
+        <MenuItem
+          onClick={() =>
+            downloadTextFile(`${baseName}.txt`, displayedMinutes, "text/plain")
+          }
+        >
+          Text (.txt)
+        </MenuItem>
+      </MenuContent>
+    </MenuRoot>
   );
 }
