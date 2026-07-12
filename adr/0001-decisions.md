@@ -112,9 +112,9 @@
 | STT | `assemblyai` npm 패키지 | 공식 Node SDK, `speaker_labels: true` |
 | 회의록 생성(LLM) | `@anthropic-ai/sdk` (Claude) | 프로젝트 컨텍스트 + 최근 회의록 + 원문을 프롬프트로 구성 |
 | 오디오 저장 | 로컬 파일시스템 | v1에는 S3/R2 등 불필요 |
-| UI | Tailwind CSS + shadcn/ui | |
+| UI | ~~Tailwind CSS + shadcn/ui~~ → Tailwind v4 + Cirrus 토큰 + Base UI | superseded by [0003](0003-design-system-cirrus-tailwind-baseui.md) — 검토 없이 들어간 초안값이었음 |
 | 비동기 처리 | 큐 없이 단순 async/await | 업로드 요청 안에서 STT→LLM까지 순차 처리. 데모 규모에 큐는 과함 |
-| 패키지 매니저 | npm | 로컬에 이미 설치됨(v11), 별도 설치 불필요 |
+| 패키지 매니저 | pnpm | 실제 설치는 pnpm으로 진행됨(`pnpm-lock.yaml`). 이 표의 npm 표기는 오기 |
 
 ## 환경변수 / 보안
 
