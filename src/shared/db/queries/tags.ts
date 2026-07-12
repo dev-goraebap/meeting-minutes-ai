@@ -51,6 +51,10 @@ export async function getTagWithMeetingCount(id: string) {
   return row ?? null;
 }
 
+export async function deleteTag(id: string) {
+  await db.delete(tags).where(eq(tags.id, id));
+}
+
 export async function updateTagFields(
   id: string,
   fields: Partial<{ name: string; contextTemplate: string }>,

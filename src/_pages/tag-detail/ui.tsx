@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, Clipboard, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -71,7 +72,7 @@ export function TagDetailPage({ id }: { id: string }) {
           프로젝트 태그
         </Link>
 
-        <TagTitle tag={tag} onUpdated={fetchTag} />
+        <TagTitle tag={tag} onUpdated={fetchTag} showToast={showToast} />
 
         <p className="mt-1 text-meta text-ink-muted">
           회의 {tag.meetingCount}개 ·{" "}
@@ -88,10 +89,22 @@ export function TagDetailPage({ id }: { id: string }) {
   );
 }
 
-function TagTitle({ tag, onUpdated }: { tag: Tag; onUpdated: () => void }) {
+function TagTitle({
+  tag,
+  onUpdated,
+  showToast,
+}: {
+  tag: Tag;
+  onUpdated: () => void;
+  showToast: (message: string) => void;
+}) {
+  const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(tag.name);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const blocked = tag.meetingCount > 0;
 
   async function save() {
     if (!name.trim()) return;
@@ -104,6 +117,24 @@ function TagTitle({ tag, onUpdated }: { tag: Tag; onUpdated: () => void }) {
     setSaving(false);
     setEditing(false);
     onUpdated();
+  }
+
+  async function handleDeleteClick() {
+    if (blocked) {
+      showToast("이 태그를 사용하는 회의록이 있어 삭제할 수 없어요");
+      return;
+    }
+    if (!confirm("이 태그를 삭제할까요? 되돌릴 수 없어요.")) return;
+
+    setDeleting(true);
+    const res = await fetch(`/api/tags/${tag.id}`, { method: "DELETE" });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      showToast(body?.error ?? "삭제에 실패했어요.");
+      setDeleting(false);
+      return;
+    }
+    router.push("/tags");
   }
 
   return (
@@ -135,9 +166,14 @@ function TagTitle({ tag, onUpdated }: { tag: Tag; onUpdated: () => void }) {
       </div>
       <button
         type="button"
-        disabled
-        title="회의가 있는 태그는 삭제할 수 없어요"
-        className="flex shrink-0 items-center gap-1 text-caption text-ink-faint"
+        onClick={handleDeleteClick}
+        disabled={deleting}
+        title={blocked ? "회의가 있는 태그는 삭제할 수 없어요" : undefined}
+        className={
+          blocked
+            ? "flex shrink-0 items-center gap-1 text-caption text-ink-faint"
+            : "flex shrink-0 items-center gap-1 text-caption text-status-failed hover:underline disabled:opacity-50"
+        }
       >
         <Trash2 className="size-3.5" />
         삭제
