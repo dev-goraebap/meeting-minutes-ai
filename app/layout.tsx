@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AppNav } from "@/shared/ui/app-nav";
 
 export const metadata: Metadata = {
   title: "회의록",
@@ -16,6 +17,7 @@ export default function RootLayout({
   return (
     <html lang="ko" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
+        <AppNav />
         {children}
         {modal}
       </body>

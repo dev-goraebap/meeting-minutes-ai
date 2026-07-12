@@ -32,6 +32,36 @@ export async function getTagById(id: string) {
   return row ?? null;
 }
 
+export async function getTagWithMeetingCount(id: string) {
+  const [row] = await db
+    .select({
+      id: tags.id,
+      name: tags.name,
+      color: tags.color,
+      contextTemplate: tags.contextTemplate,
+      contextUpdatedAt: tags.contextUpdatedAt,
+      createdAt: tags.createdAt,
+      meetingCount: count(meetings.id),
+    })
+    .from(tags)
+    .leftJoin(meetings, eq(meetings.tagId, tags.id))
+    .where(eq(tags.id, id))
+    .groupBy(tags.id);
+
+  return row ?? null;
+}
+
+export async function updateTagFields(
+  id: string,
+  fields: Partial<{ name: string; contextTemplate: string }>,
+) {
+  const patch: typeof fields & { contextUpdatedAt?: Date } = { ...fields };
+  if (fields.contextTemplate !== undefined) {
+    patch.contextUpdatedAt = new Date();
+  }
+  await db.update(tags).set(patch).where(eq(tags.id, id));
+}
+
 /**
  * Returns the id of an existing tag with this exact name, or creates a new
  * one (assigning the next cycle color by creation order) and returns its id.
