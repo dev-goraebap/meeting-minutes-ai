@@ -1,13 +1,6 @@
 import type { MeetingStatus } from "@/shared/db/schema";
+import { STATUS_LABEL } from "@/shared/lib/meeting-status";
 import { cn } from "@/shared/lib/cn";
-
-const STATUS_LABEL: Record<MeetingStatus, string> = {
-  uploaded: "대기 중",
-  transcribing: "전사 중",
-  summarizing: "요약 중",
-  completed: "완료",
-  failed: "실패",
-};
 
 const STATUS_CLASSES: Record<MeetingStatus, string> = {
   uploaded: "text-status-uploaded bg-status-uploaded-surface",

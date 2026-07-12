@@ -1,6 +1,6 @@
 import { asc, count, eq } from "drizzle-orm";
 import { db } from "@/shared/db/client";
-import { tags } from "@/shared/db/schema";
+import { meetings, tags } from "@/shared/db/schema";
 
 const CYCLE_COLORS = [
   "#4C56C0",
@@ -11,7 +11,20 @@ const CYCLE_COLORS = [
 ] as const;
 
 export async function listTags() {
-  return db.select().from(tags).orderBy(asc(tags.createdAt));
+  return db
+    .select({
+      id: tags.id,
+      name: tags.name,
+      color: tags.color,
+      contextTemplate: tags.contextTemplate,
+      contextUpdatedAt: tags.contextUpdatedAt,
+      createdAt: tags.createdAt,
+      meetingCount: count(meetings.id),
+    })
+    .from(tags)
+    .leftJoin(meetings, eq(meetings.tagId, tags.id))
+    .groupBy(tags.id)
+    .orderBy(asc(tags.createdAt));
 }
 
 /**

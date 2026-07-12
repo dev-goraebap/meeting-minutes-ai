@@ -5,7 +5,8 @@ import { meetings, tags } from "@/shared/db/schema";
 export async function listMeetings({
   limit = 6,
   offset = 0,
-}: { limit?: number; offset?: number } = {}) {
+  tagId,
+}: { limit?: number; offset?: number; tagId?: string } = {}) {
   return db
     .select({
       id: meetings.id,
@@ -19,6 +20,7 @@ export async function listMeetings({
     })
     .from(meetings)
     .innerJoin(tags, eq(meetings.tagId, tags.id))
+    .where(tagId ? eq(meetings.tagId, tagId) : undefined)
     .orderBy(desc(meetings.createdAt))
     .limit(limit)
     .offset(offset);
