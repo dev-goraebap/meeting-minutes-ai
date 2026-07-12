@@ -45,3 +45,6 @@ tmp
 .agents
 .claude
 skills-lock.json
+
+# app data (sqlite db + uploaded audio)
+/data
