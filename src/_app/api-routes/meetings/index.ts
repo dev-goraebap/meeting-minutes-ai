@@ -1,0 +1,1 @@
+export { getMeetingsList } from "./list";
