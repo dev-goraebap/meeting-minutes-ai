@@ -62,6 +62,11 @@ export async function updateTagFields(
   await db.update(tags).set(patch).where(eq(tags.id, id));
 }
 
+async function nextCycleColor() {
+  const [{ total }] = await db.select({ total: count() }).from(tags);
+  return CYCLE_COLORS[total % CYCLE_COLORS.length];
+}
+
 /**
  * Returns the id of an existing tag with this exact name, or creates a new
  * one (assigning the next cycle color by creation order) and returns its id.
@@ -77,12 +82,23 @@ export async function getOrCreateTagByName(name: string) {
     return existing[0].id;
   }
 
-  const [{ total }] = await db.select({ total: count() }).from(tags);
-  const color = CYCLE_COLORS[total % CYCLE_COLORS.length];
+  const color = await nextCycleColor();
 
   const [created] = await db
     .insert(tags)
     .values({ name, color })
+    .returning({ id: tags.id });
+
+  return created.id;
+}
+
+/** Explicit tag creation with a required context (the "새 태그" modal flow). */
+export async function createTag(name: string, contextTemplate: string) {
+  const color = await nextCycleColor();
+
+  const [created] = await db
+    .insert(tags)
+    .values({ name, color, contextTemplate, contextUpdatedAt: new Date() })
     .returning({ id: tags.id });
 
   return created.id;
