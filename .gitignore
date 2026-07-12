@@ -48,3 +48,6 @@ skills-lock.json
 
 # app data (sqlite db + uploaded audio)
 /data
+
+# private home-server deploy script (server IP/paths, not for the public repo)
+deploy.sh

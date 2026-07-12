@@ -3,7 +3,8 @@
 // (never committed, never stored in the DB) so the operator can read it once.
 //
 // Usage: node scripts/generate-login-token.mjs
-// (reads DATABASE_URL from .env.local at the repo root)
+// (uses process.env.DATABASE_URL if set — e.g. `docker run --env-file` in
+// production — otherwise falls back to reading .env.local for local dev)
 
 import { createHash, randomBytes } from "node:crypto";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -13,9 +14,12 @@ import postgres from "postgres";
 
 const repoRoot = path.resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
 
-const envContent = readFileSync(path.join(repoRoot, ".env.local"), "utf8");
-const dbUrl = envContent.match(/^DATABASE_URL=(.*)$/m)?.[1]?.trim();
-if (!dbUrl) throw new Error(".env.local에 DATABASE_URL이 없어요.");
+let dbUrl = process.env.DATABASE_URL;
+if (!dbUrl) {
+  const envContent = readFileSync(path.join(repoRoot, ".env.local"), "utf8");
+  dbUrl = envContent.match(/^DATABASE_URL=(.*)$/m)?.[1]?.trim();
+}
+if (!dbUrl) throw new Error("DATABASE_URL을 찾을 수 없어요 (env var 또는 .env.local).");
 
 const CHARSET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
 const TOKEN_LENGTH = 30;

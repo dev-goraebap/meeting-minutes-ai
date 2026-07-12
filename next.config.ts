@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Minimal, self-contained production build for the Docker image (ADR-0009).
+  output: "standalone",
 };
 
 export default nextConfig;
