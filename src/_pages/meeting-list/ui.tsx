@@ -16,6 +16,7 @@ import {
   STATUS_PROGRESS,
   isProcessing,
 } from "@/shared/lib/meeting-status";
+import { usePolling } from "@/shared/lib/use-polling";
 import type { MeetingStatus } from "@/shared/db/schema";
 
 type Meeting = {
@@ -91,6 +92,21 @@ export function MeetingListPage() {
     observer.observe(el);
     return () => observer.disconnect();
   }, [offset, hasMore, loading, activeTagId, loadPage]);
+
+  const hasProcessing = meetings.some((m) => isProcessing(m.status));
+
+  const refreshVisible = useCallback(async () => {
+    if (meetings.length === 0) return;
+    const params = new URLSearchParams({
+      limit: String(meetings.length),
+      offset: "0",
+    });
+    if (activeTagId) params.set("tagId", activeTagId);
+    const res = await fetch(`/api/meetings?${params}`);
+    setMeetings(await res.json());
+  }, [meetings.length, activeTagId]);
+
+  usePolling(refreshVisible, 3000, hasProcessing);
 
   const totalCount = tags.reduce((sum, tag) => sum + tag.meetingCount, 0);
 

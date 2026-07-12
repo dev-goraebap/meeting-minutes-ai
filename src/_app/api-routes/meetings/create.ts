@@ -1,7 +1,7 @@
 import { mkdirSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 import { createMeeting } from "@/shared/db/queries/meetings";
 import { getTagById } from "@/shared/db/queries/tags";
 import { runPipeline } from "./run-pipeline";
@@ -75,14 +75,19 @@ export async function postMeeting(request: NextRequest) {
     extraNote: extraNoteValue,
   });
 
-  // Synchronous pipeline, per ADR-0001 (no queue). The response only returns
-  // once transcription + summarization have finished (or failed).
-  await runPipeline({
-    meetingId,
-    tagId,
-    audioFilePath,
-    extraNote: extraNoteValue,
-  });
+  // No queue (per ADR-0001), but the pipeline itself runs after the response
+  // is sent via Next.js `after()` — the client gets the meeting id back as
+  // soon as the file is saved, then watches transcribing/summarizing
+  // progress via polling on the detail/list pages instead of blocking the
+  // upload request for the full STT+LLM duration.
+  after(() =>
+    runPipeline({
+      meetingId,
+      tagId,
+      audioFilePath,
+      extraNote: extraNoteValue,
+    }),
+  );
 
   return NextResponse.json({ id: meetingId });
 }
