@@ -1,17 +1,15 @@
 import { sql } from "drizzle-orm";
-import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
+import { pgTable, text, timestamp, pgEnum, jsonb } from "drizzle-orm/pg-core";
 
-export const tags = sqliteTable("tags", {
+export const tags = pgTable("tags", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   color: text("color").notNull(),
   contextTemplate: text("context_template"),
-  contextUpdatedAt: integer("context_updated_at", { mode: "timestamp" }),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
+  contextUpdatedAt: timestamp("context_updated_at"),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });
 
 export const meetingStatuses = [
@@ -23,7 +21,9 @@ export const meetingStatuses = [
 ] as const;
 export type MeetingStatus = (typeof meetingStatuses)[number];
 
-export const meetings = sqliteTable("meetings", {
+export const meetingStatusEnum = pgEnum("meeting_status", meetingStatuses);
+
+export const meetings = pgTable("meetings", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -32,19 +32,15 @@ export const meetings = sqliteTable("meetings", {
     .references(() => tags.id),
   title: text("title").notNull(),
   audioFilePath: text("audio_file_path").notNull(),
-  status: text("status", { enum: meetingStatuses }).notNull().default("uploaded"),
+  status: meetingStatusEnum("status").notNull().default("uploaded"),
   errorMessage: text("error_message"),
-  // JSON: [{ speaker, start, end, text }]
-  rawTranscript: text("raw_transcript", { mode: "json" }).$type<
+  // [{ speaker, start, end, text }]
+  rawTranscript: jsonb("raw_transcript").$type<
     { speaker: string; start: number; end: number; text: string }[]
   >(),
   structuredMinutes: text("structured_minutes"),
-  // JSON: { "A": "이름", ... }
-  speakerMapping: text("speaker_mapping", { mode: "json" }).$type<
-    Record<string, string>
-  >(),
+  // { "A": "이름", ... }
+  speakerMapping: jsonb("speaker_mapping").$type<Record<string, string>>(),
   extraNote: text("extra_note"),
-  createdAt: integer("created_at", { mode: "timestamp" })
-    .notNull()
-    .default(sql`(unixepoch())`),
+  createdAt: timestamp("created_at").notNull().default(sql`now()`),
 });

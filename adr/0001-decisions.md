@@ -108,7 +108,7 @@
 |---|---|---|
 | 프레임워크 | **Next.js (App Router)** | 프론트+백엔드 통합, AI 관련 생태계/예제가 풍부 |
 | 언어 | TypeScript | |
-| DB | SQLite (Drizzle ORM) | 별도 서버 없이 파일 하나, 데모 규모에 충분 |
+| DB | ~~SQLite (Drizzle ORM)~~ → Postgres (Drizzle ORM, `postgres` 드라이버) | superseded by [0006](0006-postgres-database.md) — 사용자의 기존 내부 Postgres 인스턴스 재사용 |
 | STT | `assemblyai` npm 패키지 | 공식 Node SDK, `speaker_labels: true` |
 | 회의록 생성(LLM) | `@anthropic-ai/sdk` (Claude) | 프로젝트 컨텍스트 + 최근 회의록 + 원문을 프롬프트로 구성 |
 | 오디오 저장 | 로컬 파일시스템 | v1에는 S3/R2 등 불필요 |
