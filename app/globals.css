@@ -1,26 +1,162 @@
 @import "tailwindcss";
+@import "pretendard/dist/web/variable/pretendardvariable.css";
 
+/*
+ * Design tokens ported from the design handoff (ADR-0004):
+ * tmp/회의록 자동화 데모/design_handoff_meeting_minutes/README.md
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Surfaces */
+  --color-page: #f6f4ef;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #fbfaf6;
+
+  /* Borders / dividers */
+  --color-border: #e8e3d9;
+  --color-border-strong: #ddd7ca;
+  --color-divider: #f0ece4;
+  --color-divider-soft: #f4f1ea;
+
+  /* Text (ink scale) */
+  --color-ink: #23211c;
+  --color-ink-secondary: #6e685c;
+  --color-ink-muted: #9c9588;
+  --color-ink-faint: #b4ad9f;
+
+  /* Accent (indigo) */
+  --color-accent: #4c56c0;
+  --color-accent-hover: #3e47a8;
+  --color-accent-soft: #edeefb;
+  --color-accent-on-soft: #3b43a0;
+
+  /* Status pairs (badges, pipeline steps) — text tone + soft surface tone */
+  --color-status-uploaded: #8a8375;
+  --color-status-uploaded-surface: #f0eee7;
+  --color-status-transcribing: #b26a1f;
+  --color-status-transcribing-surface: #f6eedd;
+  --color-status-summarizing: #4c56c0;
+  --color-status-summarizing-surface: #edeefb;
+  --color-status-completed: #3f7d53;
+  --color-status-completed-surface: #e7f1e9;
+  --color-status-failed: #b0432f;
+  --color-status-failed-surface: #f7e7e2;
+
+  /* Speaker/tag cycle palette (index by creation/speaker order, 1-based) */
+  --color-cycle-1: #4c56c0;
+  --color-cycle-2: #3f7d53;
+  --color-cycle-3: #b26a1f;
+  --color-cycle-4: #8a5cc4;
+  --color-cycle-5: #2f7f86;
+
+  /* Search-match highlight */
+  --color-highlight: #dfe2fa;
+  --color-highlight-ink: #3b43a0;
+
+  /* Radius */
+  --radius-control: 10px;
+  --radius-textarea: 12px;
+  --radius-card: 16px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-token-sm: 0 1px 2px rgba(40, 36, 28, 0.05);
+  --shadow-token-md: 0 2px 8px rgba(43, 40, 80, 0.22);
+  --shadow-token-modal: 0 24px 60px rgba(30, 28, 22, 0.26);
+  --shadow-token-fab: 0 8px 22px rgba(43, 40, 80, 0.34);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-page: var(--color-page);
+  --color-surface: var(--color-surface);
+  --color-surface-sunken: var(--color-surface-sunken);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+  --color-divider: var(--color-divider);
+  --color-divider-soft: var(--color-divider-soft);
+  --color-ink: var(--color-ink);
+  --color-ink-secondary: var(--color-ink-secondary);
+  --color-ink-muted: var(--color-ink-muted);
+  --color-ink-faint: var(--color-ink-faint);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-soft: var(--color-accent-soft);
+  --color-accent-on-soft: var(--color-accent-on-soft);
+  --color-status-uploaded: var(--color-status-uploaded);
+  --color-status-uploaded-surface: var(--color-status-uploaded-surface);
+  --color-status-transcribing: var(--color-status-transcribing);
+  --color-status-transcribing-surface: var(--color-status-transcribing-surface);
+  --color-status-summarizing: var(--color-status-summarizing);
+  --color-status-summarizing-surface: var(--color-status-summarizing-surface);
+  --color-status-completed: var(--color-status-completed);
+  --color-status-completed-surface: var(--color-status-completed-surface);
+  --color-status-failed: var(--color-status-failed);
+  --color-status-failed-surface: var(--color-status-failed-surface);
+  --color-cycle-1: var(--color-cycle-1);
+  --color-cycle-2: var(--color-cycle-2);
+  --color-cycle-3: var(--color-cycle-3);
+  --color-cycle-4: var(--color-cycle-4);
+  --color-cycle-5: var(--color-cycle-5);
+  --color-highlight: var(--color-highlight);
+  --color-highlight-ink: var(--color-highlight-ink);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --radius-control: var(--radius-control);
+  --radius-textarea: var(--radius-textarea);
+  --radius-card: var(--radius-card);
+  --radius-pill: var(--radius-pill);
+
+  --shadow-token-sm: var(--shadow-token-sm);
+  --shadow-token-md: var(--shadow-token-md);
+  --shadow-token-modal: var(--shadow-token-modal);
+  --shadow-token-fab: var(--shadow-token-fab);
+
+  --font-sans: "Pretendard Variable", "Pretendard", "Apple SD Gothic Neo",
+    "Malgun Gothic", -apple-system, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Type scale (size--line-height, per README) */
+  --text-page-h1: 26px;
+  --text-page-h1--line-height: 1.3;
+  --text-page-h1--letter-spacing: -0.02em;
+  --text-detail-h1: 22px;
+  --text-detail-h1--line-height: 1.3;
+  --text-modal-h2: 19px;
+  --text-modal-h2--line-height: 1.3;
+  --text-section-label: 14px;
+  --text-section-label--line-height: 1.3;
+  --text-body: 15px;
+  --text-body--line-height: 1.75;
+  --text-row-title: 15px;
+  --text-row-title--line-height: 1.4;
+  --text-meta: 12.5px;
+  --text-meta--line-height: 1.4;
+  --text-caption: 11.5px;
+  --text-caption--line-height: 1.4;
+  --text-minutes-h1: 19px;
+  --text-minutes-h1--line-height: 1.3;
+  --text-minutes-h2: 15.5px;
+  --text-minutes-h2--line-height: 1.3;
+  --text-minutes-h3: 14px;
+  --text-minutes-h3--line-height: 1.3;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* PDF export: print only the #mm-print minutes content (Task 14). */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #mm-print,
+  #mm-print * {
+    visibility: visible;
+  }
+  #mm-print {
+    position: absolute;
+    inset: 0;
+    padding: 24px;
+  }
 }
