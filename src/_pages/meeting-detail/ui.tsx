@@ -13,6 +13,11 @@ import { TabsRoot, TabsList, Tab, TabPanel } from "@/shared/ui/tabs";
 import { formatDate } from "@/shared/lib/format-date";
 import { formatTimestamp } from "@/shared/lib/format-timestamp";
 import { usePolling } from "@/shared/lib/use-polling";
+import {
+  applySpeakerMappingToText,
+  distinctSpeakerLabels,
+  resolveSpeakerName,
+} from "@/shared/lib/apply-speaker-mapping";
 import type { MeetingStatus } from "@/shared/db/schema";
 
 type TranscriptSegment = {
@@ -257,66 +262,162 @@ function CompletedMeetingView({
     onUpdated();
   }
 
+  const displayedMinutes = applySpeakerMappingToText(
+    meeting.structuredMinutes ?? "",
+    meeting.speakerMapping,
+  );
+
   return (
-    <div className="mt-6 rounded-[var(--radius-card)] border border-border bg-surface p-6">
-      <TabsRoot defaultValue="minutes">
-        <TabsList>
-          <Tab value="minutes">구조화 회의록</Tab>
-          <Tab value="transcript">전사 원문</Tab>
-        </TabsList>
+    <>
+      <SpeakerMappingBar meeting={meeting} onUpdated={onUpdated} />
 
-        <TabPanel value="minutes">
-          <div className="mb-3 flex justify-end">
-            {editing ? (
-              <div className="flex gap-2">
-                <Button variant="secondary" onClick={() => setEditing(false)} disabled={saving}>
-                  취소
-                </Button>
-                <Button onClick={save} disabled={saving}>
-                  {saving ? "저장 중…" : "저장"}
-                </Button>
-              </div>
-            ) : (
-              <Button variant="secondary" onClick={startEditing}>
-                <Pencil className="size-3.5" />
-                편집
-              </Button>
-            )}
-          </div>
+      <div className="mt-4 rounded-[var(--radius-card)] border border-border bg-surface p-6">
+        <TabsRoot defaultValue="minutes">
+          <TabsList>
+            <Tab value="minutes">구조화 회의록</Tab>
+            <Tab value="transcript">전사 원문</Tab>
+          </TabsList>
 
-          {editing ? (
-            <Textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              rows={20}
-              className="font-mono text-body"
-            />
-          ) : (
-            <Markdown>{meeting.structuredMinutes ?? ""}</Markdown>
-          )}
-        </TabPanel>
-
-        <TabPanel value="transcript">
-          <div className="flex flex-col gap-3">
-            {(meeting.rawTranscript ?? []).map((segment, i) => (
-              <div key={i} className="flex gap-3">
-                <div className="flex w-16 shrink-0 flex-col items-start gap-1">
-                  <span
-                    className="rounded-[var(--radius-pill)] px-2 py-0.5 text-caption font-semibold text-white"
-                    style={{ backgroundColor: tagCycleColorVar(speakerCycleIndex(segment.speaker)) }}
-                  >
-                    {segment.speaker}
-                  </span>
-                  <span className="text-caption text-ink-faint">
-                    {formatTimestamp(segment.start)}
-                  </span>
+          <TabPanel value="minutes">
+            <div className="mb-3 flex justify-end">
+              {editing ? (
+                <div className="flex gap-2">
+                  <Button variant="secondary" onClick={() => setEditing(false)} disabled={saving}>
+                    취소
+                  </Button>
+                  <Button onClick={save} disabled={saving}>
+                    {saving ? "저장 중…" : "저장"}
+                  </Button>
                 </div>
-                <p className="flex-1 text-body text-ink">{segment.text}</p>
-              </div>
-            ))}
+              ) : (
+                <Button variant="secondary" onClick={startEditing}>
+                  <Pencil className="size-3.5" />
+                  편집
+                </Button>
+              )}
+            </div>
+
+            {editing ? (
+              <Textarea
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                rows={20}
+                className="font-mono text-body"
+              />
+            ) : (
+              <Markdown>{displayedMinutes}</Markdown>
+            )}
+          </TabPanel>
+
+          <TabPanel value="transcript">
+            <div className="flex flex-col gap-3">
+              {(meeting.rawTranscript ?? []).map((segment, i) => (
+                <div key={i} className="flex gap-3">
+                  <div className="flex w-16 shrink-0 flex-col items-start gap-1">
+                    <span
+                      className="rounded-[var(--radius-pill)] px-2 py-0.5 text-caption font-semibold text-white"
+                      style={{ backgroundColor: tagCycleColorVar(speakerCycleIndex(segment.speaker)) }}
+                    >
+                      {resolveSpeakerName(segment.speaker, meeting.speakerMapping)}
+                    </span>
+                    <span className="text-caption text-ink-faint">
+                      {formatTimestamp(segment.start)}
+                    </span>
+                  </div>
+                  <p className="flex-1 text-body text-ink">{segment.text}</p>
+                </div>
+              ))}
+            </div>
+          </TabPanel>
+        </TabsRoot>
+      </div>
+    </>
+  );
+}
+
+function SpeakerMappingBar({
+  meeting,
+  onUpdated,
+}: {
+  meeting: Meeting;
+  onUpdated: () => void;
+}) {
+  const speakers = distinctSpeakerLabels(meeting.rawTranscript);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState<Record<string, string>>(
+    meeting.speakerMapping ?? {},
+  );
+  const [saving, setSaving] = useState(false);
+
+  if (speakers.length === 0) return null;
+
+  function startEditing() {
+    setDraft(meeting.speakerMapping ?? {});
+    setEditing(true);
+  }
+
+  async function save() {
+    setSaving(true);
+    const cleaned = Object.fromEntries(
+      Object.entries(draft).filter(([, name]) => name.trim() !== ""),
+    );
+    await fetch(`/api/meetings/${meeting.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ speakerMapping: cleaned }),
+    });
+    setSaving(false);
+    setEditing(false);
+    onUpdated();
+  }
+
+  return (
+    <div className="mt-6 flex flex-wrap items-center gap-2 rounded-[var(--radius-card)] border border-border bg-surface p-4">
+      <span className="text-caption font-semibold text-ink-muted">화자 매핑</span>
+
+      {editing ? (
+        <>
+          {speakers.map((label) => (
+            <div key={label} className="flex items-center gap-1.5">
+              <span
+                className="rounded-[var(--radius-pill)] px-2 py-0.5 text-caption font-semibold text-white"
+                style={{ backgroundColor: tagCycleColorVar(speakerCycleIndex(label)) }}
+              >
+                {label}
+              </span>
+              <input
+                value={draft[label] ?? ""}
+                onChange={(e) => setDraft((d) => ({ ...d, [label]: e.target.value }))}
+                placeholder="이름 입력"
+                className="h-8 w-28 rounded-[var(--radius-control)] border border-border bg-surface px-2 text-caption outline-none focus:border-accent"
+              />
+            </div>
+          ))}
+          <div className="ml-auto flex gap-2">
+            <Button variant="secondary" onClick={() => setEditing(false)} disabled={saving}>
+              취소
+            </Button>
+            <Button onClick={save} disabled={saving}>
+              {saving ? "저장 중…" : "저장"}
+            </Button>
           </div>
-        </TabPanel>
-      </TabsRoot>
+        </>
+      ) : (
+        <>
+          {speakers.map((label) => (
+            <span
+              key={label}
+              className="inline-flex items-center gap-1 rounded-[var(--radius-pill)] bg-surface-sunken px-2.5 py-1 text-caption font-semibold text-ink"
+            >
+              {label} → {meeting.speakerMapping?.[label] || "미지정"}
+            </span>
+          ))}
+          <Button variant="secondary" onClick={startEditing} className="ml-auto">
+            <Pencil className="size-3.5" />
+            매핑 편집
+          </Button>
+        </>
+      )}
     </div>
   );
 }
