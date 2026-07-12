@@ -1,1 +1,1 @@
-export { getMeetingsList as GET } from "@/_app/api-routes/meetings";
+export { getMeetingsList as GET, postMeeting as POST } from "@/_app/api-routes/meetings";

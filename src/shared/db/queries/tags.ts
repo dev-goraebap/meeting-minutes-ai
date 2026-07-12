@@ -27,6 +27,11 @@ export async function listTags() {
     .orderBy(asc(tags.createdAt));
 }
 
+export async function getTagById(id: string) {
+  const [row] = await db.select().from(tags).where(eq(tags.id, id)).limit(1);
+  return row ?? null;
+}
+
 /**
  * Returns the id of an existing tag with this exact name, or creates a new
  * one (assigning the next cycle color by creation order) and returns its id.
