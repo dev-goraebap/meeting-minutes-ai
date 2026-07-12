@@ -1,4 +1,4 @@
-import { and, desc, eq, ne } from "drizzle-orm";
+import { and, desc, eq, ilike, ne, or, sql } from "drizzle-orm";
 import { db } from "@/shared/db/client";
 import { meetings, tags } from "@/shared/db/schema";
 import type { TranscriptSegment } from "@/shared/api/assemblyai";
@@ -119,6 +119,33 @@ export async function getRecentCompletedMinutes(
   return rows
     .map((r) => r.structuredMinutes)
     .filter((m): m is string => Boolean(m));
+}
+
+/** Meetings whose title, structuredMinutes, or rawTranscript text contains `query`. */
+export async function searchMeetings(query: string, limit = 30) {
+  const pattern = `%${query}%`;
+
+  return db
+    .select({
+      id: meetings.id,
+      title: meetings.title,
+      structuredMinutes: meetings.structuredMinutes,
+      rawTranscript: meetings.rawTranscript,
+      tagName: tags.name,
+      tagColor: tags.color,
+      createdAt: meetings.createdAt,
+    })
+    .from(meetings)
+    .innerJoin(tags, eq(meetings.tagId, tags.id))
+    .where(
+      or(
+        ilike(meetings.title, pattern),
+        ilike(meetings.structuredMinutes, pattern),
+        sql`${meetings.rawTranscript}::text ILIKE ${pattern}`,
+      ),
+    )
+    .orderBy(desc(meetings.createdAt))
+    .limit(limit);
 }
 
 export async function deleteMeeting(id: string) {

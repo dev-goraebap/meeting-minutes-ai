@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Check, Download, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { StatusBadge } from "@/shared/ui/status-badge";
@@ -103,7 +103,18 @@ export function speakerCycleIndex(speakerLabel: string) {
 }
 
 export function MeetingDetailPage({ id }: { id: string }) {
+  return (
+    <Suspense fallback={null}>
+      <MeetingDetailPageInner id={id} />
+    </Suspense>
+  );
+}
+
+function MeetingDetailPageInner({ id }: { id: string }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialTab: "minutes" | "transcript" =
+    searchParams.get("tab") === "transcript" ? "transcript" : "minutes";
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [retrying, setRetrying] = useState(false);
@@ -229,7 +240,11 @@ export function MeetingDetailPage({ id }: { id: string }) {
             )}
           </div>
         ) : (
-          <CompletedMeetingView meeting={meeting} onUpdated={fetchMeeting} />
+          <CompletedMeetingView
+            meeting={meeting}
+            onUpdated={fetchMeeting}
+            initialTab={initialTab}
+          />
         )}
       </div>
     </main>
@@ -239,9 +254,11 @@ export function MeetingDetailPage({ id }: { id: string }) {
 function CompletedMeetingView({
   meeting,
   onUpdated,
+  initialTab,
 }: {
   meeting: Meeting;
   onUpdated: () => void;
+  initialTab: "minutes" | "transcript";
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(meeting.structuredMinutes ?? "");
@@ -274,7 +291,7 @@ function CompletedMeetingView({
       <SpeakerMappingBar meeting={meeting} onUpdated={onUpdated} />
 
       <div className="mt-4 rounded-[var(--radius-card)] border border-border bg-surface p-6">
-        <TabsRoot defaultValue="minutes">
+        <TabsRoot key={initialTab} defaultValue={initialTab}>
           <TabsList>
             <Tab value="minutes">구조화 회의록</Tab>
             <Tab value="transcript">전사 원문</Tab>
