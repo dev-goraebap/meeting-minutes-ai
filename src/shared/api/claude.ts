@@ -64,14 +64,22 @@ export async function summarizeMeeting({
 
   const message = await client.messages.create({
     model: "claude-sonnet-5",
-    max_tokens: 4096,
+    max_tokens: 8192,
+    // claude-sonnet-5 turns on adaptive thinking by default when `thinking`
+    // is omitted (unlike Sonnet 4.6), and thinking tokens count against
+    // max_tokens — a long/repetitive transcript could exhaust the budget on
+    // thinking alone and never emit a text block. This is a plain
+    // summarization task, so thinking adds nothing; keep it off.
+    thinking: { type: "disabled" },
     system: buildSystemPrompt(tagName, contextTemplate, recentMinutes),
     messages: [{ role: "user", content: userParts.join("\n") }],
   });
 
   const textBlock = message.content.find((block) => block.type === "text");
   if (!textBlock || textBlock.type !== "text") {
-    throw new Error("Claude 응답에서 텍스트를 찾을 수 없어요.");
+    throw new Error(
+      `Claude 응답에서 텍스트를 찾을 수 없어요. (stop_reason: ${message.stop_reason})`,
+    );
   }
 
   return textBlock.text;
